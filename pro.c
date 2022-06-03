@@ -1,26 +1,18 @@
 static char help[] = "Solves a tridiagonal linear system.\n\n";
 
-/*
-  Include "petscksp.h" so that we can use KSP solvers.  Note that this file
-  automatically includes:
-     petscsys.h       - base PETSc routines   petscvec.h - vectors
-     petscmat.h - matrices
-     petscis.h     - index sets            petscksp.h - Krylov subspace methods
-     petscviewer.h - viewers               petscpc.h  - preconditioners
-
-  Note:  The corresponding uniprocessor example is ex1.c
-*/
 #include <petscksp.h>
+#include <math.h>
 int main(int argc,char **args)
 {
   Vec            us,u,f;          /* approx solution, RHS, exact solution */
   Mat            A;                /* linear system matrix */
-  //KSP            ksp;              /* linear solver context */
-  //PC             pc;               /* preconditioner context */
-  PetscReal      dx=0.01, dt=0.001, t, L=1.0, k=1.0, r=k*dt/(dx*dx), tol=1000.*PETSC_MACHINE_EPSILON ;  /* norm of solution error */
+  PetscInt       i,n=10,nx=100,col[3],rank,rstart,rend,nlocal;
+  PetscReal      dx=0.01, dt=t/n, t=1.0, L=1.0, k=1.0, r=k*dt/(dx*dx), tol=1000.*PETSC_MACHINE_EPSILON ;  /* norm of solution error */
   PetscErrorCode ierr;
-  PetscInt       i,n = 10,col[3],rank,rstart,rend,nlocal,max_ite=10000,ite=0;
-  PetscScalar    one = 1.0, zero=0.0, value[3],lambda, ;
+  PetscScalar    one = 1.0, zero=0.0, value[3],lambda;
+
+  //dt = t/n;
+  //r = k*dt/(dx*dx);
 
   ierr = PetscInitialize(&argc,&args,(char*)0,help);if (ierr) return ierr;
   ierr = PetscOptionsGetInt(NULL,NULL,"-n",&n,NULL);CHKERRQ(ierr);
@@ -50,22 +42,20 @@ int main(int argc,char **args)
   /*
      Set the vector elements.
   */
-  ierr = VecSet(z,zero);CHKERRQ(ierr);
-  if( rank == 0 )
-  { 
- 	for i 
-  	ierr = VecSetValues(z,1,&i,exp(i),INSERT_VALUES);CHKERRQ(ierr);
+  if( rank == 0 ) { 
+ 	for (i=0; i<nx; i++){
+		ierr = VecSetValues(z,1,&i,exp(i*dx),INSERT_VALUES);CHKERRQ(ierr);
+  		ierr = VecSetValues(f,1,&i,sin(3.14*i*dx),INSERT_VALUES);CHKERRQ(ierr);
+	}
   }
-
   ierr = VecAssemblyBegin(z);CHKERRQ(ierr);
   ierr = VecAssemblyEnd(z);CHKERRQ(ierr);
+  ierr = VecAssemblyBegin(f);CHKERRQ(ierr);
+  ierr = VecAssemblyEnd(f);CHKERRQ(ierr);
+
   /*
      Create matrix.  When using MatCreate(), the matrix format can
      be specified at runtime.
-
-     Performance tuning note:  For problems of substantial size,
-     preallocation of matrix memory is crucial for attaining good
-     performance. See the matrix chapter of the users manual for details.
 
      We pass in nlocal as the "local" size of the matrix to force it
      to have the same parallel layout as the vector created above.
@@ -86,17 +76,17 @@ int main(int argc,char **args)
   */
   if (!rstart) {
     rstart = 1;
-    i      = 0; col[0] = 0; col[1] = 1; value[0] = 1-2r; value[1] =r;
+    i      = 0; col[0] = 0; col[1] = 1; value[0] = 1.0-2*r; value[1] = r;
     ierr   = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
   }
   if (rend == n) {
     rend = n-1;
-    i    = n-1; col[0] = n-2; col[1] = n-1; value[0] = r; value[1] = 1-2r;
+    i    = n-1; col[0] = n-2; col[1] = n-1; value[0] = r; value[1] = 1.0-2*r;
     ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
   }
 
   /* Set entries corresponding to the mesh interior */
-  value[0] = r; value[1] = 1-2r; value[2] = r;
+  value[0] = r; value[1] = 1.0-2*r; value[2] = r;
   for (i=rstart; i<rend; i++) {
     col[0] = i-1; col[1] = i; col[2] = i+1;
     ierr   = MatSetValues(A,1,&i,3,col,value,INSERT_VALUES);CHKERRQ(ierr);
@@ -107,27 +97,28 @@ int main(int argc,char **args)
   ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
 
 
-  while ((PetscAbsReal(norm_lag - norm) > tol) && (ite < max_ite)){
-	norm = norm_lag;
+//  while ((PetscAbsReal(norm_lag - norm) > tol) && (ite < max_ite)){
+  while (nt < n){
+	//norm = norm_lag;
   	ierr = MatMultAdd(A,u,f,us);CHKERRQ(ierr);
-  	ierr = VecNorm(y,NORM_2,&norm_lag);CHKERRQ(ierr);
-	ierr = VecScale(y,(PetscScalar)one/norm_lag);CHKERRQ(ierr);
-  	ierr = VecCopy(y,z);CHKERRQ(ierr);
+  	//ierr = VecNorm(y,NORM_2,&norm_lag);CHKERRQ(ierr);
+	//ierr = VecScale(y,(PetscScalar)one/norm_lag);CHKERRQ(ierr);
+  	ierr = VecCopy(u,us);CHKERRQ(ierr);
         
 	if (ite % 20 == 0){
 	    ierr = PetscPrintf(PETSC_COMM_WORLD,"Error %g, Iterations %D\n",(double)(norm_lag - norm),ite);CHKERRQ(ierr);
 	}
-	ite++;
+	nt++;
   }
 
-  ierr = MatMultTranspose(A,z,r);CHKERRQ(ierr);
-  ierr = VecDot(r,z,&lambda);CHKERRQ(ierr);
+  //ierr = MatMultTranspose(A,z,r);CHKERRQ(ierr);
+  //ierr = VecDot(r,z,&lambda);CHKERRQ(ierr);
 
   ierr = PetscPrintf(PETSC_COMM_WORLD,"The lagest eigenvaule is %g\n The corresponding eigenvector is\n",(double)lambda);CHKERRQ(ierr);
   ierr = VecView(z,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
   
-  ierr = VecDestroy(&r);CHKERRQ(ierr); ierr = VecDestroy(&z);CHKERRQ(ierr);
-  ierr = VecDestroy(&y);CHKERRQ(ierr); 
+  ierr = VecDestroy(&u);CHKERRQ(ierr); ierr = VecDestroy(&us);CHKERRQ(ierr);
+  ierr = VecDestroy(&f);CHKERRQ(ierr); 
   ierr = MatDestroy(&A);CHKERRQ(ierr);
 
   /*
