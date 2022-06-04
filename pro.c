@@ -105,9 +105,9 @@ int main(int argc,char **args)
 	//ierr = VecScale(y,(PetscScalar)one/norm_lag);CHKERRQ(ierr);
   	ierr = VecCopy(u,us);CHKERRQ(ierr);
         
-	if (ite % 20 == 0){
-	    ierr = PetscPrintf(PETSC_COMM_WORLD,"Error %g, Iterations %D\n",(double)(norm_lag - norm),ite);CHKERRQ(ierr);
-	}
+//	if (ite % 20 == 0){
+//	    ierr = PetscPrintf(PETSC_COMM_WORLD,"Error %g, Iterations %D\n",(double)(norm_lag - norm),ite);CHKERRQ(ierr);
+//	}
 	nt++;
   }
 
