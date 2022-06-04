@@ -6,10 +6,10 @@ int main(int argc,char **args)
 {
   Vec            us,u,f,ft;          /* approx solution, RHS, exact solution */
   Mat            A;                /* linear system matrix */
-  PetscInt       i,n=100000,m=101,col[3],rank,rstart,rend,nlocal;
-  PetscReal      dx=0.01, t=1.0, dt=t/n, k=1.0, r=k*dt/(dx*dx);  /* norm of solution error */
+  PetscInt       i,n=1000,m=11,nt=0,col[3],rank,rstart,rend,nlocal;
+  PetscReal      dx=0.1, t=1.0, dt=t/n, k=1.0, r=k*dt/(dx*dx);  /* norm of solution error */
   PetscErrorCode ierr;
-  PetscScalar    value[3], u0,f0, zero=0.0,pi=3.14;
+  PetscScalar    value[3], u0,f0, zero=0.0;
 
   ierr = PetscInitialize(&argc,&args,(char*)0,help);if (ierr) return ierr;
   ierr = PetscOptionsGetInt(NULL,NULL,"-n",&n,NULL);CHKERRQ(ierr);
@@ -49,7 +49,7 @@ int main(int argc,char **args)
 	u0 = exp(i*dx);
 	ierr = VecSetValues(u,1,&i,&u0,INSERT_VALUES);CHKERRQ(ierr);
       }
-      f0 = sin(3.14*i*dx) 
+      f0 = sin(3.14*i*dx); 
       ierr = VecSetValues(f,1,&i,&f0,INSERT_VALUES);CHKERRQ(ierr);
     }
   }
@@ -59,8 +59,7 @@ int main(int argc,char **args)
   ierr = VecAssemblyBegin(f);CHKERRQ(ierr);
   ierr = VecAssemblyEnd(f);CHKERRQ(ierr);
 
-//  ierr = VecView(us,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
-
+//  ierr = VecView(f,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
 
   /*
      Create matrix.  When using MatCreate(), the matrix format can
@@ -110,18 +109,21 @@ int main(int argc,char **args)
 //  while ((PetscAbsReal(norm_lag - norm) > tol) && (ite < max_ite)){
   while (nt < n){
     //norm = norm_lag;
-    ierr = VexCopy(f,ft);CHKERRQ(ierr);
-    ierr = VexScale(ft,pi);CHKERRQ(ierr);
+    ierr = VecCopy(f,ft);CHKERRQ(ierr);
+    ierr = VecScale(ft,(PetscScalar)dt);CHKERRQ(ierr);
     ierr = MatMultAdd(A,u,ft,us);CHKERRQ(ierr);
+    i = 0;
+    ierr = VecSetValues(us,1,&i,&zero,INSERT_VALUES);CHKERRQ(ierr);
+    i = m-1;
+    ierr = VecSetValues(us,1,&i,&zero,INSERT_VALUES);CHKERRQ(ierr);
     //ierr = VecNorm(y,NORM_2,&norm_lag);CHKERRQ(ierr);
     //ierr = VecScale(y,(PetscScalar)one/norm_lag);CHKERRQ(ierr);
     ierr = VecCopy(us,u);CHKERRQ(ierr);
-        
-    if (nt % 10 == 0){
+    nt++;
+    if (nt % 50 == 0){
       ierr = PetscPrintf(PETSC_COMM_WORLD,"Temperature in %D iteration is \n", nt);CHKERRQ(ierr);
       ierr = VecView(us,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
     }
-    nt++;
   }
   ierr = VecDestroy(&u);CHKERRQ(ierr); ierr = VecDestroy(&us);CHKERRQ(ierr);
   ierr = VecDestroy(&f);CHKERRQ(ierr); ierr = VecDestroy(&ft);CHKERRQ(ierr);
