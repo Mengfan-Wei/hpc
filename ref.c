@@ -34,7 +34,7 @@ int main()
 			else {
 				/*difference equation*/
 				b[i] = a[i] + k * dt*(a[i + 1] - 2 * a[i] + a[i - 1]) / (dx*dx) + dt*sin(3.14*i*dx);  
-				a[i] = b[i];
+		ierr = VecSetValues(us,1,&i,0,INSERT_VALUES);CHKERRQ(ierr);		a[i] = b[i];
 			}
 			n++;
 			fprintf(F, "%8.4f ", a[i]);
