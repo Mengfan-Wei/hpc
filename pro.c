@@ -6,8 +6,8 @@ int main(int argc,char **args)
 {
   Vec            us,u,f,ft;          /* approx solution, RHS, exact solution */
   Mat            A;                /* linear system matrix */
-  PetscInt       i,n=1000,m=11,nt=0,col[3],rank,rstart,rend,nlocal;
-  PetscReal      dx=0.1, t=1.0, dt=t/n, k=1.0, r=k*dt/(dx*dx);  /* norm of solution error */
+  PetscInt       i,n=100000,m=101,nt=0,col[3],rank,rstart,rend,nlocal;
+  PetscReal      dx=0.01, t=1.0, dt=t/n, k=1.0, r=k*dt/(dx*dx);  /* norm of solution error */
   PetscErrorCode ierr;
   PetscScalar    value[3], u0,f0, zero=0.0;
 
@@ -120,10 +120,11 @@ int main(int argc,char **args)
     //ierr = VecScale(y,(PetscScalar)one/norm_lag);CHKERRQ(ierr);
     ierr = VecCopy(us,u);CHKERRQ(ierr);
     nt++;
-    if (nt % 50 == 0){
+    /*if (nt % 50 == 0){
       ierr = PetscPrintf(PETSC_COMM_WORLD,"Temperature in %D iteration is \n", nt);CHKERRQ(ierr);
       ierr = VecView(us,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
-    }
+    }*/
+    ierr = VecView(us,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
   }
   ierr = VecDestroy(&u);CHKERRQ(ierr); ierr = VecDestroy(&us);CHKERRQ(ierr);
   ierr = VecDestroy(&f);CHKERRQ(ierr); ierr = VecDestroy(&ft);CHKERRQ(ierr);
