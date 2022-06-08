@@ -2,31 +2,23 @@ static char help[] = "Solves a tridiagonal linear system.\n\n";
 
 #include <petscksp.h>
 #include <math.h>
-#include <hdf5.h>
 #include <assert.h>
-#define FILE "EXP.h5"
 
 int main(int argc,char **args)
 {
   Vec            us,u,f,ft;          /* approx solution, RHS, exact solution */
   Mat            A;                /* linear system matrix */
-  PetscInt       i,n=100000,m=101,nt=0,col[3],rank,rstart,rend,nlocal,restart=0;
-  PetscReal      dx=0.01, t=1.0, dt=t/n, k=1.0, r=k*dt/(dx*dx);  /* norm of solution error */
+  PetscInt       i,n=100000,m=101,nt=0,col[3],rank,rstart,rend,nlocal; /*n-time iteration; m-number of spatial grid poits */
+  PetscReal      dx=0.01, t=1.0, dt=t/n, k=1.0, r=k*dt/(dx*dx);  /*k-conductivity */
   PetscErrorCode ierr;
   PetscScalar    value[3], u0,f0, zero=0.0;
-  hid_t       file_id, dataspace_id, dataset_id;  /* identifiers */
-  hsize_t     dims[2];
-  herr_t      status;
 
   assert(dx*(m-1) == 1);
   assert(dt <= 0.5*dx*dx/k);
 
   ierr = PetscInitialize(&argc,&args,(char*)0,help);if (ierr) return ierr;
   ierr = PetscOptionsGetInt(NULL,NULL,"-n",&n,NULL);CHKERRQ(ierr);
-  ierr = PetscOptionsGetInt(NULL,NULL,"-restart",&restart,NULL);CHKERRQ(ierr);
   ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank);CHKERRQ(ierr);
-
-
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
          Compute the matrix and right-hand-side vector that define
          the linear system, Az = y.
@@ -43,29 +35,6 @@ int main(int argc,char **args)
   ierr = VecDuplicate(u,&us);CHKERRQ(ierr);
   ierr = VecDuplicate(u,&f);CHKERRQ(ierr);
   ierr = VecDuplicate(u,&ft);CHKERRQ(ierr);
-
-  /* Restart function */
-  if (!restart){
-    /* Create a new file using default properties. */
-    file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    
-    /* Create a group named "/MyGroup" in the file. */
-   // group_id = H5Gcreate2(file_id, "/MyGroup", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-     
-    /* Create the data space for the dataset "/IntArray". */
-    dims[0] = m;  /* write the current solutions every 10 iterations*/
-    dims[1] = 1;  /* write the current solutions every 10 iterations*/
-    dataspace_id = H5Screate_simple(2, dims, NULL);
-  
-    /* Create dataset "/IntArray" to store solution. */
-    dataset_id = H5Dcreate2(file_id, "/IntArray", H5T_STD_I32BE, dataspace_id,
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    /* Record dx,dt */
-    //grid[0] = dx; grid[1] = dt;
-    //status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, grid);
-  }
-  //else
-    //status = H5Dread(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, u);
 
   /* Identify the starting and ending mesh points on each
      processor for the interior part of the mesh. We let PETSc decide
@@ -144,6 +113,7 @@ int main(int argc,char **args)
 
 //  while ((PetscAbsReal(norm_lag - norm) > tol) && (ite < max_ite)){
   while (nt < n){
+    //norm = norm_lag;
     ierr = VecCopy(f,ft);CHKERRQ(ierr);
     ierr = VecScale(ft,(PetscScalar)dt);CHKERRQ(ierr);
     ierr = MatMultAdd(A,u,ft,us);CHKERRQ(ierr);
@@ -153,23 +123,12 @@ int main(int argc,char **args)
     ierr = VecSetValues(us,1,&i,&zero,INSERT_VALUES);CHKERRQ(ierr);
     ierr = VecCopy(us,u);CHKERRQ(ierr);
     nt++;
-    if (nt == 10){
-      status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, u);
-      //ierr = PetscPrintf(PETSC_COMM_WORLD,"Temperature in %D iteration with dx=%f dt=%f is \n", nt, );CHKERRQ(ierr);
-      //ierr = VecView(us,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
-    }
-    
+    /*if (nt % 50 == 0){
+      ierr = PetscPrintf(PETSC_COMM_WORLD,"Temperature in %D iteration is \n", nt);CHKERRQ(ierr);
+      ierr = VecView(us,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
+    }*/
+    ierr = VecView(us,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
   }
-
-  /* End access to the dataset and release resources used by it. */
-  status = H5Dclose(dataset_id);
-
-  /* Terminate access to the data space. */
-  //status = H5Sclose(dataspace_id);
-
-  /* Close the file. */
-  status = H5Fclose(file_id);
-
   ierr = VecDestroy(&u);CHKERRQ(ierr); ierr = VecDestroy(&us);CHKERRQ(ierr);
   ierr = VecDestroy(&f);CHKERRQ(ierr); ierr = VecDestroy(&ft);CHKERRQ(ierr);
   ierr = MatDestroy(&A);CHKERRQ(ierr);
