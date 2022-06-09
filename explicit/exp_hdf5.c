@@ -6,16 +6,21 @@ static char help[] = "Solves a tridiagonal linear system.\n\n";
 #include <assert.h>
 #define FILE "EXP.h5"
 
-int main(int argc,char **args)
+int main2(int argc,char **args)
 {
-  Vec            us,u,f,ft;          /* approx solution, RHS, exact solution */
+  Vec            us,u,f,ft;          
+  /* us-temperature at the next moment, u-current temperature
+   f-heat supply per unit volume, ft-copy of f */
   Mat            A;                /* linear system matrix */
   PetscInt       i,n=100000,m=101,nt=0,col[3],rank,rstart,rend,nlocal,restart=0;
-  PetscReal      dx=0.01, t=1.0, dt=t/n, k=1.0, r=k*dt/(dx*dx);  /* norm of solution error */
+  /* n-number of time steps, m-number of spatial mesh poits, nt-current time step*/
+  PetscReal      dx=0.01, t=1.0, dt=t/n, k=1.0, r=k*dt/(dx*dx);  
+  /* dx-spatial mesh size, t-, dt-temporal mesh size, k-conductivity */
   PetscErrorCode ierr;
   PetscScalar    value[3], u0,f0, zero=0.0;
+  /* u0-initial value of u, f0-intial value of f */
   hid_t       file_id, dataspace_id, dataset_id;  /* identifiers */
-  hsize_t     dims[2];
+  hsize_t     dims[1];
   herr_t      status;
 
   assert(dx*(m-1) == 1);
@@ -54,8 +59,7 @@ int main(int argc,char **args)
      
     /* Create the data space for the dataset "/IntArray". */
     dims[0] = m;  /* write the current solutions every 10 iterations*/
-    dims[1] = 1;  /* write the current solutions every 10 iterations*/
-    dataspace_id = H5Screate_simple(2, dims, NULL);
+    dataspace_id = H5Screate_simple(1, dims, NULL);
   
     /* Create dataset "/IntArray" to store solution. */
     dataset_id = H5Dcreate2(file_id, "/IntArray", H5T_STD_I32BE, dataspace_id,
@@ -153,7 +157,7 @@ int main(int argc,char **args)
     ierr = VecSetValues(us,1,&i,&zero,INSERT_VALUES);CHKERRQ(ierr);
     ierr = VecCopy(us,u);CHKERRQ(ierr);
     nt++;
-    if (nt == 10){
+    if (nt = 1){
       status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, u);
       //ierr = PetscPrintf(PETSC_COMM_WORLD,"Temperature in %D iteration with dx=%f dt=%f is \n", nt, );CHKERRQ(ierr);
       //ierr = VecView(us,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
@@ -165,7 +169,7 @@ int main(int argc,char **args)
   status = H5Dclose(dataset_id);
 
   /* Terminate access to the data space. */
-  //status = H5Sclose(dataspace_id);
+  status = H5Sclose(dataspace_id);
 
   /* Close the file. */
   status = H5Fclose(file_id);

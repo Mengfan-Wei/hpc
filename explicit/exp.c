@@ -3,17 +3,25 @@ static char help[] = "Solves a tridiagonal linear system.\n\n";
 #include <petscksp.h>
 #include <math.h>
 #include <assert.h>
+//#include <mpi.h>
 
 int main(int argc,char **args)
-{
-  Vec            us,u,f,ft;          /* approx solution, RHS, exact solution */
+{ 
+  //MPI_Init(&argc, &args);
+  Vec            us,u,f,ft;
+  /* us-temperature at the next moment, u-current temperature
+  f-heat supply per unit volume, ft-copy of f */
   Mat            A;                /* linear system matrix */
-  PetscInt       i,n=100000,m=101,nt=0,col[3],rank,rstart,rend,nlocal; /*n-time iteration; m-number of spatial grid poits */
-  PetscReal      dx=0.01, t=1.0, dt=t/n, k=1.0, r=k*dt/(dx*dx);  /*k-conductivity */
+  PetscInt       i,n=100000,m=101,nt=0,col[3],rank,rstart,rend,nlocal; 
+  /* n-number of time steps, m-number of spatial mesh poits, nt-current time step*/
+  PetscReal      dx=0.01, t=1.0, dt=t/n, k=1.0, r=k*dt/(dx*dx);
+  /* dx-spatial mesh size, t-, dt-temporal mesh size, k-conductivity */
   PetscErrorCode ierr;
   PetscScalar    value[3], u0,f0, zero=0.0;
+  /* u0-initial value of u, f0-intial value of f */
 
   assert(dx*(m-1) == 1);
+  assert(dt*n == t);
   assert(dt <= 0.5*dx*dx/k);
 
   ierr = PetscInitialize(&argc,&args,(char*)0,help);if (ierr) return ierr;
@@ -21,7 +29,7 @@ int main(int argc,char **args)
   ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank);CHKERRQ(ierr);
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
          Compute the matrix and right-hand-side vector that define
-         the linear system, Az = y.
+         the linear system, us = Au + dt*f.
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   /*
      Create vectors.  Note that we form 1 vector from scratch and
@@ -87,6 +95,7 @@ int main(int argc,char **args)
      For matrix assembly, each processor contributes entries for
      the part that it owns locally.
   */
+
   if (!rstart) {
     rstart = 1;
     i      = 0; col[0] = 0; col[1] = 1; value[0] = 1.0-2*r; value[1] = r;
@@ -108,12 +117,10 @@ int main(int argc,char **args)
   /* Assemble the matrix */
   ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
   ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-  
+
 //  ierr = MatView(A,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
 
-//  while ((PetscAbsReal(norm_lag - norm) > tol) && (ite < max_ite)){
   while (nt < n){
-    //norm = norm_lag;
     ierr = VecCopy(f,ft);CHKERRQ(ierr);
     ierr = VecScale(ft,(PetscScalar)dt);CHKERRQ(ierr);
     ierr = MatMultAdd(A,u,ft,us);CHKERRQ(ierr);
@@ -123,17 +130,17 @@ int main(int argc,char **args)
     ierr = VecSetValues(us,1,&i,&zero,INSERT_VALUES);CHKERRQ(ierr);
     ierr = VecCopy(us,u);CHKERRQ(ierr);
     nt++;
-    /*if (nt % 50 == 0){
+    if (nt == n){
       ierr = PetscPrintf(PETSC_COMM_WORLD,"Temperature in %D iteration is \n", nt);CHKERRQ(ierr);
       ierr = VecView(us,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
-    }*/
-    ierr = VecView(us,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
+    }
   }
   ierr = VecDestroy(&u);CHKERRQ(ierr); ierr = VecDestroy(&us);CHKERRQ(ierr);
   ierr = VecDestroy(&f);CHKERRQ(ierr); ierr = VecDestroy(&ft);CHKERRQ(ierr);
   ierr = MatDestroy(&A);CHKERRQ(ierr);
 
   ierr = PetscFinalize();
+  //MPI_Finalize();
   return ierr;
 }
 

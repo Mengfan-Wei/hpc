@@ -2,23 +2,34 @@ static char help[] = "Solves a tridiagonal linear system.\n\n";
 
 #include <petscksp.h>
 #include <math.h>
+#include <assert.h>
+
 int main(int argc,char **args)
 {
-  Vec            us,u,f,ft;          /* approx solution, RHS, exact solution */
+  Vec            us,u,f,ft;        
+  /* us-temperature at the next moment, u-current temperature
+  f-heat supply per unit volume, ft-copy of f */
   Mat            A;                /* linear system matrix */
   KSP            ksp;              /* linear solver context */
   PC             pc;               /* preconditioner context */
   PetscInt       i,n=100000,m=101,nt=0,col[3],rank,rstart,rend,nlocal;
-  PetscReal      dx=0.01, t=1.0, dt=t/n, k=1.0, r=k*dt/(dx*dx);  /* norm of solution error */
+  /* n-number of time steps, m-number of spatial mesh poits, nt-current time step*/
+  PetscReal      dx=0.01, t=1.0, dt=t/n, k=1.0, r=k*dt/(dx*dx);  
+  /* dx-spatial mesh size, t-, dt-temporal mesh size, k-conductivity */
   PetscErrorCode ierr;
   PetscScalar    value[3], u0,f0, zero=0.0;
+  /* u0-initial value of u, f0-intial value of f */
+
+  assert(dx*(m-1) == 1);
+  assert(dt*n == t);
+  assert(dt <= 0.5*dx*dx/k);  
 
   ierr = PetscInitialize(&argc,&args,(char*)0,help);if (ierr) return ierr;
   ierr = PetscOptionsGetInt(NULL,NULL,"-n",&n,NULL);CHKERRQ(ierr);
   ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank);CHKERRQ(ierr);
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
          Compute the matrix and right-hand-side vector that define
-         the linear system, Az = y.
+         the linear system, us = Au + dt*f.
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   /*
      Create vectors.  Note that we form 1 vector from scratch and
@@ -115,9 +126,7 @@ int main(int argc,char **args)
   
 //  ierr = MatView(A,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
 
-//  while ((PetscAbsReal(norm_lag - norm) > tol) && (ite < max_ite)){
   while (nt < n){
-    //norm = norm_lag;
     ierr = VecCopy(f,ft);CHKERRQ(ierr);
     ierr = VecAYPX(ft,(PetscScalar)dt,u);CHKERRQ(ierr);
     ierr = KSPSolve(ksp,ft,us);CHKERRQ(ierr);
