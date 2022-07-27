@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#BSUB -J mytest
+#BSUB -q ser
+#BSUB -n 1
+#BSUB -W 00:05 
+#BSUB -e mylog
+#BSUB -o mylog
+#BSUB -R "span[ptile=1]"
+
+
+./test/test
+numactl --hardware
+

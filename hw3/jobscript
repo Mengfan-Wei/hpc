@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#BSUB -J test7
+#BSUB -q debug
+#BSUB -n 1
+#BSUB -W 00:03 
+#BSUB -e t7.log
+#BSUB -o t7.log
+#BSUB -R "span[ptile=1]"
+#BSUB -m "r13n44"
+
+module purge
+module load intel/2018.4
+module load mpi/intel/2018.4
+
+mpirun /work/mae-weimf/hw3/dgemm_no_opt
+
+
