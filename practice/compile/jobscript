@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#BSUB -J mytest
+#BSUB -q ser
+#BSUB -n 1
+#BSUB -W 00:05 
+#BSUB -e mylog
+#BSUB -o mylog
+#BSUB -R "span[ptile=1]"
+#BSUB -m "r01n01"
+
+
+/usr/bin/time -f "simple2_no_vec: %e" numactl -C 0 ./simple2_no_vec
+
+/usr/bin/time -f "simple2: %e" numactl -C 0 ./simple2
+
+/usr/bin/time -f "simple2_avx512: %e" numactl -C 0 ./simple2_avx512
+
+/usr/bin/time -f "simple2_zmm_hi: %e" numactl -C 0 ./simple2_zmm_hi
+
+numactl --hardware
+

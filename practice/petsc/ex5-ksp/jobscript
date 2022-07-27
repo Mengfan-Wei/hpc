@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#BSUB -J mytest
+#BSUB -q ser
+#BSUB -n 5
+#BSUB -W 00:05 
+#BSUB -e mylog
+#BSUB -o mylog
+#BSUB -m "r01n05"
+
+module purge
+module load intel/2018.4
+module load mpi/intel/2018.4
+
+mpirun -np 5 ./ex5.out
+# ./ex5.out
+numactl --hardware
+

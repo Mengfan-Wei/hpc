@@ -1,0 +1,64 @@
+Sender: LSF System <lsfadmin@r01n05>
+Subject: Job 3693608: <petsc-test> in cluster <sustchpc> Done
+
+Job <petsc-test> was submitted from host <login02> by user <mae-weimf> in cluster <sustchpc> at Fri May 13 10:41:05 2022.
+Job was executed on host(s) <5*r01n05>, in queue <ser>, as user <mae-weimf> in cluster <sustchpc> at Fri May 13 10:41:05 2022.
+</work/mae-weimf> was used as the home directory.
+</work/mae-weimf/practice/petsc/ex5-ksp> was used as the working directory.
+Started at Fri May 13 10:41:05 2022.
+Terminated at Fri May 13 10:41:08 2022.
+Results reported at Fri May 13 10:41:08 2022.
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -J petsc-test
+#BSUB -q ser
+#BSUB -n 5
+#BSUB -W 00:05 
+#BSUB -e %J-petsc.err
+#BSUB -o %J-petsc.out
+#BSUB -m "r01n05"
+
+module purge
+module load intel/2018.4
+module load mpi/intel/2018.4
+
+mpirun -np 5 ./ex5.out -ksp_type gmres \
+  -ksp_gmres_restart 30 -ksp_rtol 1.0e-10 \
+  -ksp_atol 1.0e-50 -ksp_max_it 1500 \
+  -ksp_gmres_modifiedgramschmidt \
+  -pc_type asm \
+  -ksp_rtol 1.0e-10 -sub_ksp_type richardson \
+  -sub_pc_type icc -ksp_monitor_short \
+  -ksp_converged_reason \
+  -ksp_view \
+  -log_view > $LSB_JOBID.log 2>&1
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1.02 sec.
+    Max Memory :                                 11 MB
+    Average Memory :                             11.00 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              7
+    Max Threads :                                9
+    Run time :                                   2 sec.
+    Turnaround time :                            3 sec.
+
+The output (if any) follows:
+
+
+
+PS:
+
+Read file <3693608-petsc.err> for stderr output of this job.
+

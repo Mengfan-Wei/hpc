@@ -1,0 +1,191 @@
+Sender: LSF System <lsfadmin@r01n05>
+Subject: Job 3693630: <mytest> in cluster <sustchpc> Done
+
+Job <mytest> was submitted from host <login02> by user <mae-weimf> in cluster <sustchpc> at Fri May 13 10:47:21 2022.
+Job was executed on host(s) <5*r01n05>, in queue <ser>, as user <mae-weimf> in cluster <sustchpc> at Fri May 13 10:47:22 2022.
+</work/mae-weimf> was used as the home directory.
+</work/mae-weimf/practice/petsc/ex5-ksp> was used as the working directory.
+Started at Fri May 13 10:47:22 2022.
+Terminated at Fri May 13 10:47:23 2022.
+Results reported at Fri May 13 10:47:23 2022.
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+
+#BSUB -J mytest
+#BSUB -q ser
+#BSUB -n 5
+#BSUB -W 00:05 
+#BSUB -e mylog
+#BSUB -o mylog
+#BSUB -m "r01n05"
+
+
+mpirun -np 5 ./ex5.out
+# ./ex5.out
+numactl --hardware
+
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   0.13 sec.
+    Max Memory :                                 -
+    Average Memory :                             -
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              -
+    Max Threads :                                -
+    Run time :                                   1 sec.
+    Turnaround time :                            2 sec.
+
+The output (if any) follows:
+
+/work/mae-weimf/.lsbatch/1652410041.3693630.shell:行12: mpirun: 未找到命令
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+node 0 size: 97983 MB
+node 0 free: 62263 MB
+node 1 cpus: 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39
+node 1 size: 98304 MB
+node 1 free: 63380 MB
+node distances:
+node   0   1 
+  0:  10  21 
+  1:  21  10 
+Sender: LSF System <lsfadmin@r01n05>
+Subject: Job 3693648: <mytest> in cluster <sustchpc> Done
+
+Job <mytest> was submitted from host <login02> by user <mae-weimf> in cluster <sustchpc> at Fri May 13 10:50:24 2022.
+Job was executed on host(s) <5*r01n05>, in queue <ser>, as user <mae-weimf> in cluster <sustchpc> at Fri May 13 10:50:25 2022.
+</work/mae-weimf> was used as the home directory.
+</work/mae-weimf/practice/petsc/ex5-ksp> was used as the working directory.
+Started at Fri May 13 10:50:25 2022.
+Terminated at Fri May 13 10:50:26 2022.
+Results reported at Fri May 13 10:50:26 2022.
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+
+#BSUB -J mytest
+#BSUB -q ser
+#BSUB -n 5
+#BSUB -W 00:05 
+#BSUB -e mylog
+#BSUB -o mylog
+#BSUB -m "r01n05"
+
+module purge
+module load intel/2018.4
+module load mpi/intel/2018.4
+
+mpirung-np 5 ./ex5.out
+# ./ex5.out
+numactl --hardware
+
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   0.26 sec.
+    Max Memory :                                 -
+    Average Memory :                             -
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              -
+    Max Threads :                                -
+    Run time :                                   1 sec.
+    Turnaround time :                            2 sec.
+
+The output (if any) follows:
+
+/work/mae-weimf/.lsbatch/1652410224.3693648.shell:行15: mpirung-np: 未找到命令
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+node 0 size: 97983 MB
+node 0 free: 63274 MB
+node 1 cpus: 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39
+node 1 size: 98304 MB
+node 1 free: 65112 MB
+node distances:
+node   0   1 
+  0:  10  21 
+  1:  21  10 
+Sender: LSF System <lsfadmin@r01n05>
+Subject: Job 3693656: <mytest> in cluster <sustchpc> Done
+
+Job <mytest> was submitted from host <login02> by user <mae-weimf> in cluster <sustchpc> at Fri May 13 10:52:00 2022.
+Job was executed on host(s) <5*r01n05>, in queue <ser>, as user <mae-weimf> in cluster <sustchpc> at Fri May 13 10:52:02 2022.
+</work/mae-weimf> was used as the home directory.
+</work/mae-weimf/practice/petsc/ex5-ksp> was used as the working directory.
+Started at Fri May 13 10:52:02 2022.
+Terminated at Fri May 13 10:52:04 2022.
+Results reported at Fri May 13 10:52:04 2022.
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+
+#BSUB -J mytest
+#BSUB -q ser
+#BSUB -n 5
+#BSUB -W 00:05 
+#BSUB -e mylog
+#BSUB -o mylog
+#BSUB -m "r01n05"
+
+module purge
+module load intel/2018.4
+module load mpi/intel/2018.4
+
+mpirun -np 5 ./ex5.out
+# ./ex5.out
+numactl --hardware
+
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1.00 sec.
+    Max Memory :                                 -
+    Average Memory :                             -
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              -
+    Max Threads :                                -
+    Run time :                                   1 sec.
+    Turnaround time :                            4 sec.
+
+The output (if any) follows:
+
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+node 0 size: 97983 MB
+node 0 free: 63890 MB
+node 1 cpus: 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39
+node 1 size: 98304 MB
+node 1 free: 65059 MB
+node distances:
+node   0   1 
+  0:  10  21 
+  1:  21  10 

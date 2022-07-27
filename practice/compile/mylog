@@ -1,0 +1,72 @@
+Sender: LSF System <lsfadmin@r01n01>
+Subject: Job 3435989: <mytest> in cluster <sustchpc> Done
+
+Job <mytest> was submitted from host <login01> by user <mae-weimf> in cluster <sustchpc> at Wed Apr  6 16:02:24 2022.
+Job was executed on host(s) <r01n01>, in queue <ser>, as user <mae-weimf> in cluster <sustchpc> at Wed Apr  6 16:02:25 2022.
+</work/mae-weimf> was used as the home directory.
+</work/mae-weimf/hw3> was used as the working directory.
+Started at Wed Apr  6 16:02:25 2022.
+Terminated at Wed Apr  6 16:02:29 2022.
+Results reported at Wed Apr  6 16:02:29 2022.
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+
+#BSUB -J mytest
+#BSUB -q ser
+#BSUB -n 1
+#BSUB -W 00:05 
+#BSUB -e mylog
+#BSUB -o mylog
+#BSUB -R "span[ptile=1]"
+#BSUB -m "r01n01"
+
+
+/usr/bin/time -f "simple2_no_vec: %e" numactl -C 0 ./simple2_no_vec
+
+/usr/bin/time -f "simple2: %e" numactl -C 0 ./simple2
+
+/usr/bin/time -f "simple2_avx512: %e" numactl -C 0 ./simple2_avx512
+
+/usr/bin/time -f "simple2_zmm_hi: %e" numactl -C 0 ./simple2_zmm_hi
+
+numactl --hardware
+
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1.20 sec.
+    Max Memory :                                 4 MB
+    Average Memory :                             2.00 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   83 MB
+    Max Processes :                              5
+    Max Threads :                                6
+    Run time :                                   3 sec.
+    Turnaround time :                            5 sec.
+
+The output (if any) follows:
+
+simple2_no_vec: 0.67
+simple2: 0.25
+simple2_avx512: 0.12
+simple2_zmm_hi: 0.08
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+node 0 size: 97983 MB
+node 0 free: 83180 MB
+node 1 cpus: 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39
+node 1 size: 98304 MB
+node 1 free: 83925 MB
+node distances:
+node   0   1 
+  0:  10  21 
+  1:  21  10 

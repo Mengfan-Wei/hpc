@@ -1,0 +1,105 @@
+Sender: LSF System <lsfadmin@r01n07>
+Subject: Job 3685485: <mytest> in cluster <sustchpc> Done
+
+Job <mytest> was submitted from host <login02> by user <mae-weimf> in cluster <sustchpc> at Thu May 12 11:09:27 2022.
+Job was executed on host(s) <r01n07>, in queue <ser>, as user <mae-weimf> in cluster <sustchpc> at Thu May 12 11:09:27 2022.
+</work/mae-weimf> was used as the home directory.
+</work/mae-weimf/practice/petsc/ex1-demo> was used as the working directory.
+Started at Thu May 12 11:09:27 2022.
+Terminated at Thu May 12 11:09:29 2022.
+Results reported at Thu May 12 11:09:29 2022.
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+
+#BSUB -J mytest
+#BSUB -q ser
+#BSUB -n 1
+#BSUB -W 00:05 
+#BSUB -e mylog
+#BSUB -o mylog
+#BSUB -R "span[ptile=1]"
+#BSUB -m "r01n07"
+
+
+./run_script.sh
+numactl --hardware
+
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   0.17 sec.
+    Max Memory :                                 5 MB
+    Average Memory :                             5.00 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              7
+    Max Threads :                                8
+    Run time :                                   2 sec.
+    Turnaround time :                            2 sec.
+
+The output (if any) follows:
+
+SNES Object: 1 MPI processes
+  type: newtonls
+  maximum iterations=50, maximum function evaluations=10000
+  tolerances: relative=1e-08, absolute=1e-50, solution=1e-08
+  total number of linear solver iterations=8
+  total number of function evaluations=5
+  norm schedule ALWAYS
+  Jacobian is built using a DMDA local Jacobian
+  SNESLineSearch Object: 1 MPI processes
+    type: bt
+      interpolation: cubic
+      alpha=1.000000e-04
+    maxstep=1.000000e+08, minlambda=1.000000e-12
+    tolerances: relative=1.000000e-08, absolute=1.000000e-15, lambda=1.000000e-08
+    maximum iterations=40
+  KSP Object: 1 MPI processes
+    type: gmres
+      restart=30, using Classical (unmodified) Gram-Schmidt Orthogonalization with no iterative refinement
+      happy breakdown tolerance 1e-30
+    maximum iterations=10000, initial guess is zero
+    tolerances:  relative=1e-05, absolute=1e-50, divergence=10000.
+    left preconditioning
+    using PRECONDITIONED norm type for convergence test
+  PC Object: 1 MPI processes
+    type: ilu
+      out-of-place factorization
+      0 levels of fill
+      tolerance for zero pivot 2.22045e-14
+      matrix ordering: natural
+      factor fill ratio given 1., needed 1.
+        Factored matrix follows:
+          Mat Object: 1 MPI processes
+            type: seqaij
+            rows=16, cols=16
+            package used to perform factorization: petsc
+            total: nonzeros=64, allocated nonzeros=64
+              not using I-node routines
+    linear system matrix = precond matrix:
+    Mat Object: 1 MPI processes
+      type: seqaij
+      rows=16, cols=16
+      total: nonzeros=64, allocated nonzeros=64
+      total number of mallocs used during MatSetValues calls=0
+        not using I-node routines
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+node 0 size: 97983 MB
+node 0 free: 58888 MB
+node 1 cpus: 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39
+node 1 size: 98304 MB
+node 1 free: 70718 MB
+node distances:
+node   0   1 
+  0:  10  21 
+  1:  21  10 
